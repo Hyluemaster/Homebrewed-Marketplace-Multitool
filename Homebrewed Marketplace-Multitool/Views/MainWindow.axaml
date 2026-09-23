@@ -1,0 +1,65 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:Homebrewed_Marketplace_Multitool.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Homebrewed_Marketplace_Multitool.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="Homebrewed_Marketplace_Multitool"
+        Background="Beige">
+
+    <Design.DataContext>
+        <!-- This only sets the DataContext for the previewer in an IDE,
+             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
+        <vm:MainViewModel />
+    </Design.DataContext>
+
+    <StackPanel VerticalAlignment="Center" Background="Bisque">
+        <Border Margin="5" CornerRadius="10" Background="BurlyWood">
+            <TextBlock Text="{Binding Greeting}"
+                Margin="5"
+                FontSize="24"
+                HorizontalAlignment="Center" />
+        </Border>
+
+        <Grid ShowGridLines="True" Margin="5"
+            ColumnDefinitions="140, 140, 140"
+            RowDefinitions="Auto, Auto"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+            <Button Content="Phone"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,50,0,0"
+                Grid.Row="0" Grid.Column="0" />
+            <Button Content="Serial-Messenger"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,50,0,0"
+                Grid.Row="0" Grid.Column="1" />
+            <Button Content="Locker"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,50,0,0"
+                Grid.Row="0" Grid.Column="2" />
+            <Button Content="Blackboard"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,50,0,0"
+                Grid.Row="1" Grid.Column="0" />
+            <Button Content="Playground"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,50,0,0"
+                Grid.Row="1" Grid.Column="1" />
+            <Button Content="Library"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Margin="0,50,0,0"
+                Grid.Row="1" Grid.Column="2" />
+        </Grid>
+    </StackPanel>
+
+</Window>
