@@ -51,7 +51,8 @@
             <Button Content="Library"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
-                Width="230" Height="82" />
+                Width="230" Height="82"
+                Click="OnLibraryClick" />
         </UniformGrid>
     </StackPanel>
 
