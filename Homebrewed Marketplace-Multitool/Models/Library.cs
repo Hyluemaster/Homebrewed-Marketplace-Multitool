@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using Homebrewed_Marketplace_Multitool.Models.Items;
 using Database = Homebrewed_Marketplace_Multitool.Models.Database;
+using MySqlConnector;
 
 namespace Homebrewed_Marketplace_Multitool.Models
 {
@@ -11,43 +14,65 @@ namespace Homebrewed_Marketplace_Multitool.Models
             "server=localhost;" +
             "user=root;" +
             "password=;" +
-            "database=homebrewed_marketplace"
+            "database=homebrewed-marketplace_general-db"
         );
-        public List<Book> Books { get; set; } = new List<Book>();
+        public List<Book> Books { get; private set; } = new List<Book>();
 
         public Library()
         {
-            // Loads all documents from the database into the library.
-            var command = new MySqlConnector.MySqlCommand(
-                "SELECT * FROM books",
-                DB.CreateConnection()
+        }
+
+        public void LoadBooks()
+        {
+            var books = new List<Book>();
+            using var connection = DB.CreateConnection();
+            connection.Open();
+            using var command = new MySqlCommand(
+                "SELECT id, filename, file_content, owner FROM books",
+                connection
             );
-            var response = command.ExecuteReader();
+            using var response = command.ExecuteReader();
             while (response.Read())
             {
-                var id = response.GetInt32("id");
-                var name = response.GetString("name");
-                var content = response.GetString("content");
-                Books.Add(new Book(id, name, content));
+                var id = response.GetUInt64("id");
+                var name = response.GetString("filename");
+                var contentValue = response["file_content"];
+                var content = contentValue switch
+                {
+                    byte[] bytes => bytes,
+                    string text => Encoding.UTF8.GetBytes(text),
+                    DBNull => null,
+                    _ => throw new InvalidDataException(
+                        $"The file_content for book '{name}' is not stored as binary or text data.")
+                };
+                books.Add(new Book(id, name, content, response.GetInt32("owner")));
             }
+
+            Books = books;
         }
 
         public List<string> AddBook(Book book)
         {
-            // Adds a new book to the library and the database.
-            Books.Add(book);
-            var command = new MySqlConnector.MySqlCommand(
-                "INSERT INTO books (name, content) VALUES (@name, @content)",
-                DB.CreateConnection()
-            );
-            command.Parameters.AddWithValue("@name", book.Name);
-            command.Parameters.AddWithValue("@content", book.Content);
             try
             {
+                using var connection = DB.CreateConnection();
+                connection.Open();
+                using var command = new MySqlCommand(
+                    "INSERT INTO books (filename, file_content, owner) " +
+                    "VALUES (@filename, @file_content, @owner)",
+                    connection
+                );
+                command.Parameters.AddWithValue("@filename", book.Name);
+                command.Parameters.Add("@file_content", MySqlDbType.LongBlob).Value =
+                    book.Content is null ? DBNull.Value : book.Content;
+                command.Parameters.AddWithValue("@owner", book.OwnerId);
                 command.ExecuteNonQuery();
+                using var idCommand = new MySqlCommand("SELECT LAST_INSERT_ID()", connection);
+                book.Id = Convert.ToUInt64(idCommand.ExecuteScalar());
+                Books.Add(book);
                 return ["OK", ""];
             }
-            catch (Exception ex)
+            catch (MySqlException ex)
             {
                 return ["Error", $"Error occurred while adding {book.Name}: {ex.Message}"];
             }
@@ -59,21 +84,25 @@ namespace Homebrewed_Marketplace_Multitool.Models
             var existingBook = Books.Find(b => b.Id == book.Id);
             if (existingBook != null)
             {
-                existingBook.Name = book.Name;
-                existingBook.Content = book.Content;
-                var command = new MySqlConnector.MySqlCommand(
-                    "UPDATE books SET name = @name, content = @content WHERE id = @id",
-                    DB.CreateConnection()
-                );
-                command.Parameters.AddWithValue("@id", book.Id);
-                command.Parameters.AddWithValue("@name", book.Name);
-                command.Parameters.AddWithValue("@content", book.Content);
                 try
                 {
+                    using var connection = DB.CreateConnection();
+                    connection.Open();
+                    using var command = new MySqlCommand(
+                        "UPDATE books SET filename = @filename, file_content = @file_content " +
+                        "WHERE id = @id",
+                        connection
+                    );
+                    command.Parameters.AddWithValue("@id", book.Id);
+                    command.Parameters.AddWithValue("@filename", book.Name);
+                    command.Parameters.Add("@file_content", MySqlDbType.LongBlob).Value =
+                        book.Content is null ? DBNull.Value : book.Content;
                     command.ExecuteNonQuery();
+                    existingBook.Name = book.Name;
+                    existingBook.Content = book.Content;
                     return ["OK", ""];
                 }
-                catch (Exception ex)
+                catch (MySqlException ex)
                 {
                     return ["Error", $"Error occurred while updating {book.Name}: {ex.Message}"];
                 }
@@ -84,24 +113,26 @@ namespace Homebrewed_Marketplace_Multitool.Models
             }
         }
 
-        public List<string> RemoveBook(int id)
+        public List<string> RemoveBook(ulong id)
         {
             // Removes a book from the library and the database.
             var book = Books.Find(b => b.Id == id);
             if (book != null)
             {
-                Books.Remove(book);
-                var command = new MySqlConnector.MySqlCommand(
-                    "DELETE FROM books WHERE id = @id",
-                    DB.CreateConnection()
-                );
-                command.Parameters.AddWithValue("@id", id);
                 try
                 {
+                    using var connection = DB.CreateConnection();
+                    connection.Open();
+                    using var command = new MySqlCommand(
+                        "DELETE FROM books WHERE id = @id",
+                        connection
+                    );
+                    command.Parameters.AddWithValue("@id", id);
                     command.ExecuteNonQuery();
+                    Books.Remove(book);
                     return ["OK", ""];
                 }
-                catch (Exception ex)
+                catch (MySqlException ex)
                 {
                     return ["Error", $"Error occurred while removing {book.Name}: {ex.Message}"];
                 }
@@ -109,7 +140,7 @@ namespace Homebrewed_Marketplace_Multitool.Models
             return ["Error", "Book not found."];
         }
 
-        public Book? GetBook(int id)
+        public Book? GetBook(ulong id)
         {
             // Retrieves a book from the library by its ID.
             return Books.Find(b => b.Id == id);
@@ -129,10 +160,9 @@ namespace Homebrewed_Marketplace_Multitool.Models
 
         public string GetColourCode(Book book)
         {
-            var temp = book.Name.Split('.');
-            if (temp.Length > 1)
+            var extension = Path.GetExtension(book.Name).TrimStart('.').ToLowerInvariant();
+            if (extension.Length > 0)
             {
-                var extension = temp[1];
                 return extension switch
                 {
                     "txt" => "#FFFFFF", // White for TXT

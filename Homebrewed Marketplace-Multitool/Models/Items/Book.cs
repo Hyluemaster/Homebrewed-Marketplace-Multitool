@@ -5,11 +5,11 @@ namespace Homebrewed_Marketplace_Multitool.Models.Items
     public class Book : Item
     {
         public override string Type => "Book";
-        public Book(int id, string name, object content) : base(id, name, content)
+        public int OwnerId { get; set; }
+
+        public Book(ulong id, string name, byte[]? content, int ownerId) : base(id, name, content)
         {
-            Id = id;
-            Name = name;
-            Content = content;
+            OwnerId = ownerId;
         }
     }
 }
