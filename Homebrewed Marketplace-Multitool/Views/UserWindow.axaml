@@ -1,0 +1,68 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Homebrewed_Marketplace_Multitool.Views.UserWindow"
+        Title="Account"
+        Width="480" Height="520"
+        MinWidth="420" MinHeight="460"
+        Background="#171B22">
+    <Grid Margin="24" RowDefinitions="Auto,*,Auto" RowSpacing="16">
+        <StackPanel Spacing="4">
+            <TextBlock Text="Your account" FontSize="26" FontWeight="SemiBold" />
+            <TextBlock Text="Log in or create an account."
+                       Foreground="#AAB4C3" />
+        </StackPanel>
+
+        <TabControl x:Name="AuthTabs" Grid.Row="1">
+            <TabItem Header="Log in">
+                <Border Padding="18" Background="#252B35" CornerRadius="8">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Welcome back" FontSize="18" FontWeight="SemiBold" />
+                        <TextBox x:Name="LoginUsernameBox"
+                                 PlaceholderText="Username"
+                                 MaxLength="64" />
+                        <TextBox x:Name="LoginPasswordBox"
+                                 PlaceholderText="Password"
+                                 PasswordChar="*"
+                                 MaxLength="30" />
+                        <Button Content="Log in"
+                                HorizontalAlignment="Stretch"
+                                Padding="12,9"
+                                Click="OnLoginClick" />
+                    </StackPanel>
+                </Border>
+            </TabItem>
+            <TabItem Header="Register">
+                <Border Padding="18" Background="#252B35" CornerRadius="8">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Create an account" FontSize="18" FontWeight="SemiBold" />
+                        <TextBox x:Name="RegisterUsernameBox"
+                                 PlaceholderText="Username"
+                                 MaxLength="64" />
+                        <TextBox x:Name="RegisterPasswordBox"
+                                 PlaceholderText="Password"
+                                 PasswordChar="*"
+                                 MaxLength="30" />
+                        <TextBox x:Name="ConfirmPasswordBox"
+                                 PlaceholderText="Confirm password"
+                                 PasswordChar="*"
+                                 MaxLength="30" />
+                        <TextBlock Text="3–30 characters; include uppercase, lowercase, a number, and a symbol."
+                                   FontSize="12"
+                                   Foreground="#AAB4C3"
+                                   TextWrapping="Wrap" />
+                        <Button Content="Create account"
+                                HorizontalAlignment="Stretch"
+                                Padding="12,9"
+                                Click="OnRegisterClick" />
+                    </StackPanel>
+                </Border>
+            </TabItem>
+        </TabControl>
+
+        <TextBlock x:Name="StatusText"
+                   Grid.Row="2"
+                   MinHeight="20"
+                   TextWrapping="Wrap"
+                   Foreground="#AAB4C3" />
+    </Grid>
+</Window>

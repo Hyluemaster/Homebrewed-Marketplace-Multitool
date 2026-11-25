@@ -85,11 +85,19 @@ namespace Homebrewed_Marketplace_Multitool.Models.Services
                 CryptographicOperations.ZeroMemory(passwordBytes);
             }
 
+            var storedUsername = reader.GetString("Username");
+            var nickname = reader.IsDBNull(reader.GetOrdinal("Nickname"))
+                ? storedUsername
+                : reader.GetString("Nickname");
+            var group = reader.IsDBNull(reader.GetOrdinal("Group"))
+                ? null
+                : reader.GetString("Group");
+
             CurrentUser = new User(
                 Convert.ToUInt64(reader["UID"]),
-                reader.GetString("Nickname"),
-                reader.GetString("Username"),
-                reader.GetString("Group")
+                nickname,
+                storedUsername,
+                group
             );
             return CurrentUser;
         }

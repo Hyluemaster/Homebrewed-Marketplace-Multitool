@@ -6,8 +6,9 @@ using System.Linq;
 using System.Xml;
 using Avalonia.Media;
 using CommunityToolkit.Mvvm.Input;
-using Homebrewed_Marketplace_Multitool.Models;
 using Homebrewed_Marketplace_Multitool.Models.Items;
+using Homebrewed_Marketplace_Multitool.Models.Modules;
+using Homebrewed_Marketplace_Multitool.Models.Services;
 using MySqlConnector;
 
 namespace Homebrewed_Marketplace_Multitool.ViewModels;

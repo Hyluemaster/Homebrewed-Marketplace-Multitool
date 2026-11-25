@@ -14,4 +14,9 @@ public partial class MainWindow : Window
     {
         new LibraryWindow().Show(this);
     }
+
+    private void OnUserClick(object? sender, RoutedEventArgs e)
+    {
+        new UserWindow().Show(this);
+    }
 }

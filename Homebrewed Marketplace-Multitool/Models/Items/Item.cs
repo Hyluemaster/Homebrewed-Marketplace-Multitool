@@ -5,13 +5,11 @@ namespace Homebrewed_Marketplace_Multitool.Models.Items
 	    public ulong Id { get; set; }
 	    public string Name { get; set; }
         public abstract string Type { get; }
-        public byte[]? Content { get; set; }
 
-        public Item(ulong id, string name, byte[]? content)
+	    public Item(ulong id, string name)
         {
             Id = id;
             Name = name;
-            Content = content;
         }
     }
 }
